@@ -7,22 +7,7 @@ from slugify import slugify
 from tqdm import tqdm
 
 
-class Covid(object):
-    def download(self, path):
-        url = "https://raw.githubusercontent.com/starschema/COVID-19-data/master/README.md"
-        r = requests.get(url)
-        content = filter(lambda line: 'starschema.covid' in line, str(r.content).split('\\n'))
-        downloadables = []
-
-        for line in content:
-            line = line.strip()
-            c = list(map(lambda x: x.strip(), filter(lambda i: len(i.strip()) > 0, line.split('|'))))
-            url = c[-1].split('(')[-1].rstrip(')')
-            downloadables.append({'url': url, 'title': c[0]})
-
-        for d in tqdm(downloadables):
-            self.download_file(d, path)
-
+class CovidUtil(object):
     @staticmethod
     def download_file(d, path="./"):
         fname = slugify(d['title'])
@@ -52,9 +37,31 @@ class Covid(object):
                 except Exception as err:
                     print("Failed to upload %s\n%s" % (file, err))
 
-    def upload(self, directory):
-        self.upload_dataset(directory)
 
+class Covid(object):
+    @staticmethod
+    def download(path):
+        url = "https://raw.githubusercontent.com/starschema/COVID-19-data/master/README.md"
+        r = requests.get(url)
+        content = filter(lambda line: 'starschema.covid' in line, str(r.content).split('\\n'))
+        downloadables = []
+
+        for line in content:
+            line = line.strip()
+            c = list(map(lambda x: x.strip(), filter(lambda i: len(i.strip()) > 0, line.split('|'))))
+            url = c[-1].split('(')[-1].rstrip(')')
+            downloadables.append({'url': url, 'title': c[0]})
+
+        for d in tqdm(downloadables):
+            CovidUtil.download_file(d, path)
+
+    @staticmethod
+    def upload(directory):
+        CovidUtil.upload_dataset(directory)
+
+    def sync(self, directory):
+        self.download(directory)
+        self.upload(directory)
 
 if __name__ == '__main__':
   fire.Fire(Covid)
