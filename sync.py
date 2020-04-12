@@ -33,7 +33,7 @@ class CovidUtil(object):
                     dest_path = os.path.join('/COVID-19-DATASETS', file)
                     print('Uploading %s to %s' % (file_path, dest_path))
                     with open(file_path, 'rb') as f:
-                        dbx.files_upload(f.read(), dest_path, mute=True)
+                        dbx.files_upload(f.read(), dest_path, mute=True, mode=dropbox.files.WriteMode.overwrite)
                 except Exception as err:
                     print("Failed to upload %s\n%s" % (file, err))
 
